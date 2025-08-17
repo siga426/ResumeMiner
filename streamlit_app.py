@@ -13,10 +13,19 @@ from query_loader import QueryLoader
 
 
 def get_api_config():
-	# 优先读取 Streamlit Secrets，其次读取环境变量，最后使用默认值
-	api_key = st.secrets.get('RESUME_API_KEY', os.getenv('RESUME_API_KEY', 'd2a7gnen04uuiosfsnk0'))
-	base_url = st.secrets.get('RESUME_BASE_URL', os.getenv('RESUME_BASE_URL', 'https://aiagentplatform.cmft.com'))
-	user_id = st.secrets.get('RESUME_USER_ID', os.getenv('RESUME_USER_ID', 'Siga'))
+	# 从 Streamlit Secrets 读取 API 配置
+	api_key = st.secrets.get('RESUME_API_KEY')
+	base_url = st.secrets.get('RESUME_BASE_URL')
+	user_id = st.secrets.get('RESUME_USER_ID')
+	
+	# 检查是否所有配置都已设置
+	if not all([api_key, base_url, user_id]):
+		st.error('❌ API 配置不完整，请在 Streamlit Cloud 的 Settings → Secrets 中配置以下信息：\n'
+				'- RESUME_API_KEY: API 密钥\n'
+				'- RESUME_BASE_URL: API 基础 URL\n'
+				'- RESUME_USER_ID: 用户 ID')
+		st.stop()
+	
 	return api_key, base_url, user_id
 
 
@@ -64,14 +73,8 @@ def main():
 	st.title('📋 简历信息提取系统 - Streamlit 版')
 	st.caption('在云端运行，无需本地部署。支持单文件查询与批量文件名生成查询。')
 
-	# ——— 侧边栏：API 配置 ———
-	with st.sidebar:
-		st.header('🔑 API 配置')
-		default_api_key, default_base_url, default_user_id = get_api_config()
-		api_key = st.text_input('API Key', value=default_api_key, type='password')
-		base_url = st.text_input('Base URL', value=default_base_url)
-		user_id = st.text_input('User ID', value=default_user_id)
-		st.info('建议在 Streamlit Secrets 中配置以上三项，部署后可在 Settings → Secrets 中设置。')
+	# 从 Streamlit Secrets 读取 API 配置（不显示在界面上）
+	api_key, base_url, user_id = get_api_config()
 
 	# ——— 模式选择 ———
 	mode = st.radio('选择上传模式：', ['📄 单文件模式', '📁 批量文件模式'], horizontal=True)
@@ -106,7 +109,7 @@ def main():
 
 	# ——— 开始提取 ———
 	st.divider()
-	can_run = bool(queries) and all([api_key, base_url, user_id])
+	can_run = bool(queries)
 	run = st.button('🚀 开始提取', disabled=not can_run)
 	if run:
 		with st.spinner('正在提取简历信息，请稍候...'):
