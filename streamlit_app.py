@@ -69,8 +69,8 @@ def to_failed_queries_excel_bytes(failed_queries: List[dict]) -> bytes:
 
 
 def main():
-	st.set_page_config(page_title='简历信息提取系统 - Streamlit', layout='wide')
-	st.title('📋 简历信息提取系统 - Streamlit 版')
+	st.set_page_config(page_title='CMSR - 简历信息提取系统', layout='wide')
+	st.title('📋 CMSR - 简历信息提取系统')
 	st.caption('在云端运行，无需本地部署。支持单文件查询与批量文件名生成查询。')
 
 	# 从 Streamlit Secrets 读取 API 配置（不显示在界面上）
